@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getCachedFeed, setCachedFeed, redis } from '@/lib/cache/redis'
-import { generateBusinessDomains } from '@/lib/llm/claude'
+import { generateBusinessDomains } from '@/lib/llm'
 import { bulkCheckAvailability } from '@/lib/domain/availability'
 import { getAffiliateLink } from '@/lib/domain/affiliate'
 import crypto from 'crypto'
@@ -33,7 +33,23 @@ interface RequestBody {
 
 const CACHE_TTL = 3600 // 1 hour
 
+function getLLMConfigError(): string | null {
+  const provider = process.env.LLM_PROVIDER?.toLowerCase() ?? 'anthropic'
+  if (provider === 'gemini' && !process.env.GEMINI_API_KEY) {
+    return 'GEMINI_API_KEY is not set in your environment variables'
+  }
+  if (provider !== 'gemini' && !process.env.ANTHROPIC_API_KEY) {
+    return 'ANTHROPIC_API_KEY is not set. Set it, or set LLM_PROVIDER=gemini with a GEMINI_API_KEY'
+  }
+  return null
+}
+
 export async function POST(request: NextRequest) {
+  const configError = getLLMConfigError()
+  if (configError) {
+    return NextResponse.json({ error: configError }, { status: 503 })
+  }
+
   try {
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown'
     const body: RequestBody = await request.json()
@@ -109,6 +125,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ domains, cached: false })
   } catch (error) {
     console.error('/api/suggest-domains error:', error)
-    return NextResponse.json({ error: 'Failed to generate domain suggestions' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to generate domain suggestions'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

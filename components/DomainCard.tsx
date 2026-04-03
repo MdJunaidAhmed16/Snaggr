@@ -15,6 +15,7 @@ export interface DomainCardProps {
   reasoning: string
   views_today: number
   heat: number
+  is_mock?: boolean
 }
 
 function HeatBadge({ score }: { score: number }) {
@@ -72,13 +73,19 @@ export default function DomainCard({
   reasoning,
   views_today,
   heat,
+  is_mock = false,
 }: DomainCardProps) {
   const [saved, setSaved] = useState(false)
+
+  // Build registrar links — Namecheap as primary (shows clean registration page),
+  // GoDaddy as secondary. GoDaddy shows "broker" page when domain is taken,
+  // which is why we only show it as an alternative.
+  const namecheapUrl = `https://www.namecheap.com/domains/registration/results/?domain=${encodeURIComponent(domain)}`
+  const godaddyUrl = `https://www.godaddy.com/domainsearch/find?checkAvail=1&domainToCheck=${encodeURIComponent(domain)}&isc=cjcdomsrch`
 
   const handleSave = () => {
     setSaved((prev) => {
       const next = !prev
-      // Persist to localStorage
       try {
         const key = 'snaggr:saved'
         const existing: string[] = JSON.parse(localStorage.getItem(key) ?? '[]')
@@ -103,10 +110,17 @@ export default function DomainCard({
           : 'border-[#2a2a2a] opacity-60'
       )}
     >
+      {/* Demo badge */}
+      {is_mock && (
+        <div className="absolute right-3 top-3 rounded bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-amber-500">
+          Demo
+        </div>
+      )}
+
       {/* Header: domain + heat badge */}
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-xl font-bold text-white tracking-tight">
+          <h3 className="truncate pr-10 text-xl font-bold tracking-tight text-white">
             {domain}
           </h3>
           {!available && (
@@ -135,15 +149,13 @@ export default function DomainCard({
       )}
 
       {/* Price + views */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {price_usd != null && available && (
-            <span className="text-sm font-medium text-green-400">
-              ${price_usd.toFixed(2)}/yr
-            </span>
-          )}
-          <FomoSignals views={views_today} />
-        </div>
+      <div className="flex items-center gap-3">
+        {price_usd != null && available && (
+          <span className="text-sm font-semibold text-green-400">
+            ${price_usd.toFixed(2)}/yr
+          </span>
+        )}
+        <FomoSignals views={views_today} />
       </div>
 
       {/* Actions */}
@@ -161,8 +173,9 @@ export default function DomainCard({
           {saved ? '★ Saved' : '☆ Save'}
         </button>
 
+        {/* Primary CTA — Namecheap (clean registration page, no broker surprises) */}
         <a
-          href={purchase_url}
+          href={available ? namecheapUrl : '#'}
           target="_blank"
           rel="noopener noreferrer"
           className={clsx(
@@ -173,14 +186,41 @@ export default function DomainCard({
           )}
           onClick={available ? undefined : (e) => e.preventDefault()}
         >
-          Buy Domain →
+          Register →
         </a>
       </div>
 
-      {/* FOMO tagline */}
-      <p className="border-t border-[#1e1e1e] pt-3 text-center text-[11px] italic text-gray-600">
-        If you don't buy this, someone else will.
-      </p>
+      {/* Secondary registrar links */}
+      {available && (
+        <div className="flex items-center justify-between border-t border-[#1e1e1e] pt-3">
+          <span className="text-[11px] text-gray-600">Also check:</span>
+          <div className="flex gap-3">
+            <a
+              href={godaddyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-gray-500 underline-offset-2 hover:text-gray-300 hover:underline"
+            >
+              GoDaddy
+            </a>
+            <a
+              href={purchase_url !== namecheapUrl ? purchase_url : namecheapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] text-gray-500 underline-offset-2 hover:text-gray-300 hover:underline"
+            >
+              Namecheap
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* FOMO tagline (only shown when not demo) */}
+      {!is_mock && (
+        <p className="text-center text-[11px] italic text-gray-600">
+          If you don&apos;t buy this, someone else will.
+        </p>
+      )}
     </div>
   )
 }

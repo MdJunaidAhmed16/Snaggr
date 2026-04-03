@@ -14,6 +14,13 @@ interface SuggestedDomain {
 
 const TLD_OPTIONS = ['.com', '.io', '.dev', '.ai', '.co']
 
+const PRICE_FILTERS = [
+  { label: 'Any price', value: 0 },
+  { label: 'Under $15', value: 15 },
+  { label: 'Under $25', value: 25 },
+  { label: 'Under $50', value: 50 },
+]
+
 const LOADING_MESSAGES = [
   'Consulting the algorithm...',
   'Checking the vibe...',
@@ -29,6 +36,7 @@ export default function IdeaGenerator() {
   const [loading, setLoading] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('')
   const [domains, setDomains] = useState<SuggestedDomain[]>([])
+  const [maxPrice, setMaxPrice] = useState(0)
   const [error, setError] = useState<string | null>(null)
 
   const toggleTld = (tld: string) => {
@@ -166,29 +174,57 @@ export default function IdeaGenerator() {
       {/* Results */}
       {domains.length > 0 && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          {/* Results header + price filter */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-lg font-semibold text-white">
               {domains.length} Domain{domains.length !== 1 ? 's' : ''} Generated
             </h2>
-            <span className="text-xs text-gray-500">
-              {domains.filter((d) => d.available).length} available
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">Price:</span>
+              <div className="flex gap-1.5">
+                {PRICE_FILTERS.map((f) => (
+                  <button
+                    key={f.value}
+                    onClick={() => setMaxPrice(f.value)}
+                    className={clsx(
+                      'rounded-full px-3 py-1 text-xs font-medium transition-all duration-150',
+                      maxPrice === f.value
+                        ? 'bg-green-600 text-white'
+                        : 'bg-[#1a1a1a] text-gray-400 hover:bg-[#222222] hover:text-white'
+                    )}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {domains.map((d, i) => {
-              const props: DomainCardProps = {
-                domain: d.domain,
-                available: d.available,
-                price_usd: d.price ?? null,
-                purchase_url: d.purchase_url,
-                reasoning: d.reasoning,
-                views_today: Math.floor(Math.random() * 30) + 5,
-                heat: d.available ? 65 + Math.random() * 30 : 20,
-              }
-              return <DomainCard key={`${d.domain}-${i}`} {...props} />
-            })}
+            {domains
+              .filter((d) => maxPrice === 0 || (d.price != null && d.price <= maxPrice))
+              .map((d, i) => {
+                const props: DomainCardProps = {
+                  domain: d.domain,
+                  available: d.available,
+                  price_usd: d.price ?? null,
+                  purchase_url: d.purchase_url,
+                  reasoning: d.reasoning,
+                  views_today: Math.floor(Math.random() * 30) + 5,
+                  heat: d.available ? 65 + Math.random() * 30 : 20,
+                }
+                return <DomainCard key={`${d.domain}-${i}`} {...props} />
+              })}
           </div>
+
+          {domains.filter((d) => maxPrice === 0 || (d.price != null && d.price <= maxPrice)).length === 0 && (
+            <p className="py-6 text-center text-sm text-gray-500">
+              No domains under ${maxPrice}.{' '}
+              <button onClick={() => setMaxPrice(0)} className="text-indigo-400 hover:underline">
+                Show all
+              </button>
+            </p>
+          )}
         </div>
       )}
 

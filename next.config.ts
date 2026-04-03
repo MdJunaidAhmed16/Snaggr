@@ -21,9 +21,7 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['@vercel/postgres'],
-  },
+  serverExternalPackages: ['@vercel/postgres'],
   images: {
     remotePatterns: [],
   },

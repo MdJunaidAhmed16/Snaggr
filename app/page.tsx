@@ -106,10 +106,10 @@ export default function HomePage() {
       {/* Social proof / stats strip */}
       <div className="mt-20 grid grid-cols-2 gap-6 rounded-2xl border border-[#1a1a1a] bg-[#111111] p-8 sm:grid-cols-4">
         {[
-          { value: '10k+', label: 'Domains tracked' },
-          { value: '3', label: 'Trend sources' },
-          { value: '2hr', label: 'Update cycle' },
-          { value: '100%', label: 'Signal-driven' },
+          { value: '20+', label: 'Fresh picks daily' },
+          { value: '5', label: 'Signal sources' },
+          { value: '2hr', label: 'Refresh cycle' },
+          { value: '0', label: 'Guesswork' },
         ].map((stat) => (
           <div key={stat.label} className="text-center">
             <p className="text-3xl font-black text-white">{stat.value}</p>

@@ -3,7 +3,7 @@ import { checkDomainAvailability } from '@/lib/domain/availability'
 import { getAffiliateLink } from '@/lib/domain/affiliate'
 
 interface RouteParams {
-  params: { domain: string }
+  params: Promise<{ domain: string }>
 }
 
 export async function GET(
@@ -11,7 +11,8 @@ export async function GET(
   { params }: RouteParams
 ) {
   try {
-    const domain = decodeURIComponent(params.domain).toLowerCase()
+    const { domain: rawDomain } = await params
+    const domain = decodeURIComponent(rawDomain).toLowerCase()
 
     // Strict domain validation: only allow valid domain characters
     const DOMAIN_REGEX = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z]{2,})(\.[a-z]{2,})?$/

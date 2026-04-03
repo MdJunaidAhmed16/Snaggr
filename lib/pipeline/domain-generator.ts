@@ -1,4 +1,4 @@
-import { generateWithClaude } from '../llm/claude'
+import { generateWithLLM } from '../llm'
 
 export interface DomainCandidate {
   domain: string
@@ -37,7 +37,7 @@ Respond with a JSON array in this exact format:
 Only respond with the JSON array, no other text.`
 
   try {
-    const result = await generateWithClaude(prompt)
+    const result = await generateWithLLM(prompt)
     if (Array.isArray(result)) {
       return result.filter(
         (item): item is DomainCandidate =>

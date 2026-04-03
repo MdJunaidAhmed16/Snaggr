@@ -3,7 +3,7 @@
 // Override via OPENROUTER_MODEL env var, e.g. "meta-llama/llama-3.3-70b-instruct:free"
 
 const BASE_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const DEFAULT_MODEL = 'google/gemini-2.0-flash-exp:free'
+const DEFAULT_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
 
 export async function callOpenRouter(prompt: string): Promise<unknown> {
   const apiKey = process.env.OPENROUTER_API_KEY

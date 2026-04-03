@@ -36,17 +36,12 @@ Respond with a JSON array in this exact format:
 
 Only respond with the JSON array, no other text.`
 
-  try {
-    const result = await generateWithLLM(prompt)
-    if (Array.isArray(result)) {
-      return result.filter(
-        (item): item is DomainCandidate =>
-          typeof item.domain === 'string' && typeof item.reasoning === 'string'
-      )
-    }
-    return []
-  } catch (error) {
-    console.error(`generateDomainCandidates error for "${keyword}":`, error)
-    return []
+  const result = await generateWithLLM(prompt)
+  if (Array.isArray(result)) {
+    return result.filter(
+      (item): item is DomainCandidate =>
+        typeof item.domain === 'string' && typeof item.reasoning === 'string'
+    )
   }
+  throw new Error(`LLM returned non-array: ${JSON.stringify(result)}`)
 }

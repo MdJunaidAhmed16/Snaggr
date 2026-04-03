@@ -1,18 +1,20 @@
 import { callClaude } from './claude'
 import { callGemini } from './gemini'
+import { callOpenRouter } from './openrouter'
 
-// Set LLM_PROVIDER=gemini in .env.local to use Gemini, defaults to anthropic
-function getProvider(): 'anthropic' | 'gemini' {
+// LLM_PROVIDER options: 'anthropic' | 'gemini' | 'openrouter'
+// Defaults to 'anthropic' if not set
+function getProvider(): 'anthropic' | 'gemini' | 'openrouter' {
   const p = process.env.LLM_PROVIDER?.toLowerCase()
   if (p === 'gemini') return 'gemini'
+  if (p === 'openrouter') return 'openrouter'
   return 'anthropic'
 }
 
 export async function generateWithLLM(prompt: string): Promise<unknown> {
   const provider = getProvider()
-  if (provider === 'gemini') {
-    return callGemini(prompt)
-  }
+  if (provider === 'gemini') return callGemini(prompt)
+  if (provider === 'openrouter') return callOpenRouter(prompt)
   return callClaude(prompt)
 }
 

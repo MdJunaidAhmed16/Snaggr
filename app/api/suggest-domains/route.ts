@@ -36,10 +36,13 @@ const CACHE_TTL = 3600 // 1 hour
 function getLLMConfigError(): string | null {
   const provider = process.env.LLM_PROVIDER?.toLowerCase() ?? 'anthropic'
   if (provider === 'gemini' && !process.env.GEMINI_API_KEY) {
-    return 'GEMINI_API_KEY is not set in your environment variables'
+    return 'GEMINI_API_KEY is not set'
   }
-  if (provider !== 'gemini' && !process.env.ANTHROPIC_API_KEY) {
-    return 'ANTHROPIC_API_KEY is not set. Set it, or set LLM_PROVIDER=gemini with a GEMINI_API_KEY'
+  if (provider === 'openrouter' && !process.env.OPENROUTER_API_KEY) {
+    return 'OPENROUTER_API_KEY is not set'
+  }
+  if (provider === 'anthropic' && !process.env.ANTHROPIC_API_KEY) {
+    return 'ANTHROPIC_API_KEY is not set'
   }
   return null
 }

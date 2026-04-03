@@ -100,7 +100,10 @@ export async function POST(request: NextRequest) {
           kw.category
         )
 
-        if (candidates.length === 0) continue
+        if (candidates.length === 0) {
+          log.push(`No candidates generated for "${kw.keyword}" — LLM may have failed or returned empty`)
+          continue
+        }
 
         // Step 6: Check availability
         const domainNames = candidates.map((c) => c.domain)
